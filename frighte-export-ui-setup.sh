@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script installs Apache and PHP, creates the necessary index.html and export.php files
 # in the web root (/var/www/html/exportui), and sets up a simple site accessible at
-# http://(YOUR_IP_HERE)-OR-(YOUR_FQDN_HERE)/exportui.
+# http://frigate.snuggleshome.com/exportui.
 # Intended for Debian/Ubuntu-based systems. Run as root or with sudo.
 
 set -e
@@ -19,14 +19,16 @@ echo "Installing Apache, PHP, and PHP cURL extension..."
 apt-get install -y apache2 php libapache2-mod-php php-curl
 
 # Define the base web directory (Apache's DocumentRoot)
+SUB_DIR="exportui"
 WEB_DIR="/var/www/html"
 
 # Create a subdirectory "exportui" for your UI
-echo "Creating directory $WEB_DIR/exportui..."
-mkdir -p "$WEB_DIR/exportui"
+FULL_DIR="$WEB_DIR/$SUB_DIR"
+echo "Creating directory $FULL_DIR..."
+mkdir -p "$FULL_DIR"
 
-echo "Creating index.html in $WEB_DIR/exportui..."
-cat > "$WEB_DIR/exportui/index.html" << 'EOF'
+echo "Creating index.html in $FULL_DIR..."
+cat > "$FULL_DIR/index.html" << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,8 +66,8 @@ cat > "$WEB_DIR/exportui/index.html" << 'EOF'
 </html>
 EOF
 
-echo "Creating export.php in $WEB_DIR/exportui..."
-cat > "$WEB_DIR/exportui/export.php" << 'EOF'
+echo "Creating export.php in $FULL_DIR..."
+cat > "$FULL_DIR/export.php" << 'EOF'
 <?php
 // export.php
 
@@ -128,7 +130,7 @@ curl_close($ch);
 if ($exportHttpCode === 200) {
     echo '<html>';
     echo '<head>';
-    echo '<meta http-equiv="refresh" content="5;url=index.html">';
+    echo '<meta http-equiv="refresh" content="5;url=https://frigate.example.com/export">';
     echo '<title>Export Started</title>';
     echo '</head>';
     echo '<body>';
@@ -142,9 +144,9 @@ if ($exportHttpCode === 200) {
 ?>
 EOF
 
-echo "Setting ownership and permissions for $WEB_DIR/exportui..."
-chown -R www-data:www-data "$WEB_DIR/exportui"
-chmod -R 755 "$WEB_DIR/exportui"
+echo "Setting ownership and permissions for $FULL_DIR..."
+chown -R www-data:www-data "$FULL_DIR"
+chmod -R 755 "$FULL_DIR"
 
 echo "Restarting Apache..."
 systemctl restart apache2
